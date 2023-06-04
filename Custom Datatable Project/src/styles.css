@@ -1,0 +1,73 @@
+#dataTable {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#table_box {
+    width: 90%;
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    white-space: nowrap;
+    margin: 0;
+}
+
+#searchButton{
+    width: fit-content;
+    border: none !important;
+    border-radius: 48% !important;
+}
+
+.searchGroup{
+    max-width: 35%;
+}
+
+#search_input:active, #search_input:focus, #searchButton:active, #searchButton:focus {
+    outline: none !important;
+    box-shadow: none;
+}
+
+#search_input{
+    border: none;
+    max-width: 100%;
+    /* justify-content: flex; */
+}
+
+.buttonGroup{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#search-addon,
+th {
+    cursor: pointer;
+}
+
+.fa.fa-times{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px;
+}
+
+#arrow {
+    max-height: 20px;
+    max-width: 20px;
+    margin-bottom: 3px;
+}
+
+#close_button{
+    display: none;
+    cursor: pointer;
+    justify-content: flex-end;
+}
