@@ -11,11 +11,7 @@ $(document).ready(function () {
     phone_country_code,
     email,
     created_time,
-    iterator,
-    temp_phone_number; // temporary variable to store the (country code + phone number)
-
-  var p_input = document.getElementById("phone_number");
-  window.intlTelInput(p_input, {});
+    iterator;
 
   // validation variables
   var user_code_error = true,
@@ -24,6 +20,21 @@ $(document).ready(function () {
     last_name_error = true,
     phone_number_error = true,
     email_error = true;
+
+  var input = document.querySelector("#phone_number"),
+    initial_country = "IN";
+
+  // initialise plugin
+  const iti = window.intlTelInput(input, {
+    separateDialCode: true,
+    initialCountry: initial_country,
+    preferredCountries: ["us", "in", "gb"],
+    utilsScript:
+      "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+  });
+
+  // getting the country code of the selected country and storing it with a plus sign ahead
+  var country_code = "+" + iti.getSelectedCountryData().dialCode;
 
   $.ajax({
     url: "https://glexas.com/hostel_data/API/test/new_admission_list.php",
@@ -113,85 +124,45 @@ $(document).ready(function () {
   // displaying the value of the table fields in edit modal
   $("tbody").on("click", "#edit_btn", function () {
     iterator = $(this).data("iterator");
-    console.log(iterator);
 
     $("#update_entry").css("display", "block");
     $("#add_entry").css("display", "none");
+    $("#phone_number_output").css("display", "none");
 
-    $("#registration_main_id").val(table_data[iterator].registration_main_id);
+    registration_main_id = table_data[iterator].registration_main_id;
     $("#user_code").val(table_data[iterator].user_code);
     $("#first_name").val(table_data[iterator].first_name);
     $("#middle_name").val(table_data[iterator].middle_name);
     $("#last_name").val(table_data[iterator].last_name);
-
-    // storing the country code into the global variable
     phone_country_code = table_data[iterator].phone_country_code;
-
-    // to display the whole phone number (country code + phone number) in the phone number field in modal
-    $("#phone_number").val(
-      phone_country_code + table_data[iterator].phone_number
-    );
-
+    // to set the exact phone into the modal field
+    iti.setNumber(phone_country_code + table_data[iterator].phone_number);
+    $("#phone_number").val(table_data[iterator].phone_number);
     $("#email").val(table_data[iterator].email);
 
     $("#modalLabel").text("Edit Entry");
+
+    $("#user_code").css("border", "");
+    $("#first_name").css("border", "");
+    $("#middle_name").css("border", "");
+    $("#last_name").css("border", "");
+    $("#phone_number").css("border", "");
+    $("#email").css("border", "");
   });
 
   // editing the existing datatable entry
   $("#exampleModal").on("click", "#update_entry", function (event) {
     event.preventDefault();
-    registration_main_id = $("#registration_main_id").val();
+
     user_code = $("#user_code").val();
     first_name = $("#first_name").val();
     middle_name = $("#middle_name").val();
     last_name = $("#last_name").val();
-
-    // fetching the updated phone number and storing it inside the temporary variable
-    temp_phone_number = $("#phone_number").val();
-
-    // extracting the country code from the entered phone number
-    phone_country_code = temp_phone_number.slice(0, 3);
-    // extracting the phone number from the entered phone number
-    phone_number = temp_phone_number.slice(3);
-
+    phone_number = $("#phone_number").val();
+    phone_country_code = "+" + iti.getSelectedCountryData().dialCode;
     email = $("#email").val();
     created_time = table_data[iterator].created_time;
 
-    $.ajax({
-      url: "https://glexas.com/hostel_data/API/test/new_admission_update.php",
-      method: "POST",
-      data: {
-        registration_main_id: registration_main_id,
-        user_code: user_code,
-        first_name: first_name,
-        middle_name: middle_name,
-        last_name: last_name,
-        phone_number: phone_number,
-        phone_country_code: phone_country_code,
-        email: email,
-        created_time: created_time,
-      },
-      success: function (data) {
-        if (data.status === true) {
-          location.reload();
-        } else {
-          alert("Data couldn't be deleted !");
-        }
-      },
-    });
-  });
-
-  $("tfoot").on("click", "#add_btn", function () {
-    $("#update_entry").css("display", "none");
-    $("#add_entry").css("display", "block");
-    $("#modalLabel").text("Add New Entry");
-    $("#registration_main_id").css("display", "none");
-  });
-
-  // adding new entry to the datatable
-  $("#exampleModal").on("click", "#add_entry", function (event) {
-    temp_phone_number;
-    event.preventDefault();
     validate_user_code();
     validate_first_name();
     validate_middle_name();
@@ -207,30 +178,13 @@ $(document).ready(function () {
       phone_number_error === true ||
       email_error === true
     ) {
-      event.preventDefault();
       return false;
     } else {
-      user_code = $("#user_code").val();
-      first_name = $("#first_name").val();
-      middle_name = $("#middle_name").val();
-      last_name = $("#last_name").val();
-
-      // fetching the phone number and storing it inside the temporary variable
-      temp_phone_number = $("#phone_number").val();
-
-      // extracting the country code from the entered phone number
-      phone_country_code = temp_phone_number.slice(0, 3);
-
-      // extracting the phone number from the entered phone number
-      phone_number = temp_phone_number.slice(3);
-
-      email = $("#email").val();
-      created_time = new Date();
-
       $.ajax({
-        url: "https://glexas.com/hostel_data/API/test/new_admission_insert.php",
+        url: "https://glexas.com/hostel_data/API/test/new_admission_update.php",
         method: "POST",
         data: {
+          registration_main_id: registration_main_id,
           user_code: user_code,
           first_name: first_name,
           middle_name: middle_name,
@@ -251,6 +205,80 @@ $(document).ready(function () {
     }
   });
 
+  $("tfoot").on("click", "#add_btn", function () {
+    $("#update_entry").css("display", "none");
+    $("#add_entry").css("display", "block");
+    $("#modalLabel").text("Add New Entry");
+
+    $("#user_code").val("");
+    $("#first_name").val("");
+    $("#middle_name").val("");
+    $("#last_name").val("");
+    $("#phone_number").val("");
+    $("#email").val("");
+
+    iti.setCountry(initial_country);
+  });
+
+  // adding new entry to the datatable
+  $("#exampleModal").on("click", "#add_entry", function (event) {
+    event.preventDefault();
+
+    if (
+      user_code_error === true ||
+      first_name_error === true ||
+      middle_name_error === true ||
+      last_name_error === true ||
+      phone_number_error === true ||
+      email_error === true
+    ) {
+      return false;
+    } else {
+      user_code = $("#user_code").val();
+      first_name = $("#first_name").val();
+      middle_name = $("#middle_name").val();
+      last_name = $("#last_name").val();
+      phone_country_code = country_code;
+      phone_number = $("#phone_number").val();
+      email = $("#email").val();
+      created_time = new Date();
+
+      $.ajax({
+        url: "https://glexas.com/hostel_data/API/test/check_username.php",
+        method: "POST",
+        success: function (data) {
+          if (data.message === "available") {
+            $.ajax({
+              url: "https://glexas.com/hostel_data/API/test/new_admission_insert.php",
+              method: "POST",
+              data: {
+                user_code: user_code,
+                first_name: first_name,
+                middle_name: middle_name,
+                last_name: last_name,
+                phone_number: phone_number,
+                phone_country_code: phone_country_code,
+                email: email,
+                created_time: created_time,
+              },
+              success: function (data) {
+                if (data.status === true) {
+                  location.reload();
+                } else {
+                  alert("Data couldn't be deleted !");
+                }
+              },
+            });
+          } else if(data.message === "not_available") {
+            alert("Sorry !! No such User Code exists in the database..");
+          }
+        },
+      });
+    }
+  });
+
+  // validation functions for each field to verify the entered data by the user
+
   function validate_user_code() {
     var validate_user_code = new RegExp("^[a-zA-Z_.,!@#$%^&*₹]+$");
     user_code = $("#user_code").val();
@@ -262,6 +290,7 @@ $(document).ready(function () {
       user_code_error = true;
     }
   }
+
   function validate_first_name() {
     var validate_first_name = new RegExp("^[a-zA-Z]+$");
     first_name = $("#first_name").val();
@@ -299,19 +328,57 @@ $(document).ready(function () {
   }
 
   function validate_phone_number() {
-    var validate_phone_number = new RegExp("^[\+1-9][0-9]{2,12}$");
-    phone_number = $("#phone_number").val();
-    if (validate_phone_number.test(phone_number)) {
-      phone_number_error = false;
-      $("#phone_number").css("border", "2px solid green");
-    } else {
-      $("#phone_number").css("border", "2px solid red");
-      phone_number_error = true;
-    }
+    const input = document.querySelector("#phone_number");
+    const output = document.querySelector("#phone_number_output");
+    let text, textNode;
+
+    // here, the index maps to the error code returned from getValidationError - see readme
+    const errorMap = [
+      "Invalid number",
+      "Invalid country code",
+      "Too short",
+      "Too long",
+      "Invalid number",
+    ];
+
+    const change = () => {
+      if (input.value) {
+        if (
+          iti.isValidNumber() &&
+          country_code !== iti.getSelectedCountryData().dialCode
+        ) {
+          text =
+            "Valid number! ✓ Full international format: " + iti.getNumber();
+          output.style.color = "green";
+          $("#phone_number").css("border", "2px solid green");
+          phone_number_error = false;
+          country_code = "+" + iti.getSelectedCountryData().dialCode;
+          textNode = document.createTextNode(text);
+          output.innerHTML = "";
+          output.appendChild(textNode);
+        } else {
+          text = "Invalid number - please try again";
+          output.style.color = "red";
+          $("#phone_number").css("border", "2px solid red");
+          phone_number_error = true;
+          textNode = document.createTextNode(text);
+          output.innerHTML = "";
+          output.appendChild(textNode);
+        }
+      } else {
+        text = "Please enter a valid number above";
+        output.style.color = "red";
+      }
+    };
+    change();
+
+    input.addEventListener("countrychange", function () {
+      change();
+    });
   }
 
   function validate_email() {
-    var validate_email = /^\S+@\S+\.\S+$/;
+    var validate_email = /^[a-z0-9]+@[a-z]+\.[a-z]{2,3}$/;
     email = $("#email").val();
     if (validate_email.test(email)) {
       email_error = false;
@@ -321,4 +388,65 @@ $(document).ready(function () {
       email_error = true;
     }
   }
+
+  $("#user_code").keyup(function () {
+    validate_user_code();
+  });
+
+  $("#first_name").keyup(function () {
+    validate_first_name();
+  });
+
+  $("#middle_name").keyup(function () {
+    validate_middle_name();
+  });
+
+  $("#last_name").keyup(function () {
+    validate_last_name();
+  });
+
+  $("#phone_number").keyup(function () {
+    validate_phone_number();
+  });
+
+  $("#email").keyup(function () {
+    validate_email();
+  });
+
+  //keypress events to detect and avoid unallowed characters to be inputted by the user
+
+  $("#user_code").on("keypress", function (event) {
+    var check_user_code = /^[a-zA-Z]+$/;
+    if (!check_user_code.test(event.key)) {
+      event.preventDefault();
+    }
+  });
+
+  $("#first_name").on("keypress", function (event) {
+    var check_first_name = /^[a-zA-Z]+$/;
+    if (!check_first_name.test(event.key)) {
+      event.preventDefault();
+    }
+  });
+
+  $("#middle_name").on("keypress", function (event) {
+    var check_middle_name = /^[a-zA-Z]+$/;
+    if (!check_middle_name.test(event.key)) {
+      event.preventDefault();
+    }
+  });
+
+  $("#last_name").on("keypress", function (event) {
+    var check_last_name = /^[a-zA-Z]+$/;
+    if (!check_last_name.test(event.key)) {
+      event.preventDefault();
+    }
+  });
+
+  $("#phone_number").on("keypress", function (event) {
+    var check_phone_number = /^[0-9]+$/;
+    if (!check_phone_number.test(event.key)) {
+      event.preventDefault();
+    }
+  });
 });

@@ -1,8 +1,37 @@
-.data-table{
+.data-table {
     margin: 40px 60px;
 }
 
-#add_btn{
+#add_btn {
     background-color: #FFD700;
     color: white;
+}
+
+.hide {
+    display: none;
+}
+
+#error-msg {
+    color: red;
+    /* border: 2px solid red; */
+}
+
+#valid-msg {
+    color: green;
+    /* border: 2px solid red; */
+}
+
+#output {
+    color: rgb(0, 0, 0);
+    /* border: 2px solid red; */
+}
+
+#phone_number{
+    bottom: 0;
+    float: left;
+    vertical-align: middle;
+}
+
+label{
+    width: 100%;
 }
