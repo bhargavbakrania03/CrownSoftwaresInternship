@@ -1,4 +1,6 @@
 $(document).ready(function () {
+  $(".loader").show();
+  $(".data-table").hide();
   var table_data,
     length,
     html,
@@ -95,6 +97,8 @@ $(document).ready(function () {
           $("tbody").html(html);
         }
         $("#example").DataTable();
+        $(".loader").hide();
+        $(".data-table").show();
       } else {
         alert("Some error occurred while fetching the data from server");
       }
@@ -104,7 +108,8 @@ $(document).ready(function () {
   // removing the entry from the datatable
   $("tbody").on("click", "#remove_btn", function () {
     var delete_id = $(this).data("registration_id");
-
+    $(".data-table").hide();
+    $(".loader").show();
     $.ajax({
       url: "https://glexas.com/hostel_data/API/test/new_admission_delete.php",
       method: "POST",
@@ -113,6 +118,8 @@ $(document).ready(function () {
       },
       success: function (data) {
         if (data.status === true) {
+          $(".loader").hide();
+          $(".data-table").show();
           location.reload();
         } else {
           alert("Data couldn't be deleted !");
@@ -153,7 +160,9 @@ $(document).ready(function () {
   // editing the existing datatable entry
   $("#exampleModal").on("click", "#update_entry", function (event) {
     event.preventDefault();
-
+    $(".data-table").hide();
+    $("#exampleModal").hide();
+    $(".loader").show();
     user_code = $("#user_code").val();
     first_name = $("#first_name").val();
     middle_name = $("#middle_name").val();
@@ -196,6 +205,8 @@ $(document).ready(function () {
         },
         success: function (data) {
           if (data.status === true) {
+            $(".loader").hide();
+            $(".data-table").show();
             location.reload();
           } else {
             alert("Data couldn't be deleted !");
@@ -223,7 +234,9 @@ $(document).ready(function () {
   // adding new entry to the datatable
   $("#exampleModal").on("click", "#add_entry", function (event) {
     event.preventDefault();
-
+    $(".data-table").hide();
+    $("#exampleModal").hide();
+    $(".loader").show();
     if (
       user_code_error === true ||
       first_name_error === true ||
@@ -244,33 +257,25 @@ $(document).ready(function () {
       created_time = new Date();
 
       $.ajax({
-        url: "https://glexas.com/hostel_data/API/test/check_username.php",
+        url: "https://glexas.com/hostel_data/API/test/new_admission_insert.php",
         method: "POST",
+        data: {
+          user_code: user_code,
+          first_name: first_name,
+          middle_name: middle_name,
+          last_name: last_name,
+          phone_number: phone_number,
+          phone_country_code: phone_country_code,
+          email: email,
+          created_time: created_time,
+        },
         success: function (data) {
-          if (data.message === "available") {
-            $.ajax({
-              url: "https://glexas.com/hostel_data/API/test/new_admission_insert.php",
-              method: "POST",
-              data: {
-                user_code: user_code,
-                first_name: first_name,
-                middle_name: middle_name,
-                last_name: last_name,
-                phone_number: phone_number,
-                phone_country_code: phone_country_code,
-                email: email,
-                created_time: created_time,
-              },
-              success: function (data) {
-                if (data.status === true) {
-                  location.reload();
-                } else {
-                  alert("Data couldn't be deleted !");
-                }
-              },
-            });
-          } else if(data.message === "not_available") {
-            alert("Sorry !! No such User Code exists in the database..");
+          if (data.status === true) {
+            $(".loader").hide();
+            $(".data-table").show();
+            location.reload();
+          } else {
+            alert("Data couldn't be deleted !");
           }
         },
       });
