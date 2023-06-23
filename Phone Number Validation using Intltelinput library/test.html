@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Manipulating</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css">
+    <style>
+        .hide {
+            display: none;
+        }
+
+        #error-msg {
+            color: red;
+            /* border: 2px solid red; */
+        }
+
+        #valid-msg {
+            color: green;
+            /* border: 2px solid red; */
+        }
+
+        #output {
+            color: red;
+            /* border: 2px solid red; */
+        }
+    </style>
+</head>
+
+<body>
+    <input type="tel" id="phone">
+    <button type="submit">Submit</button>
+    <span id="error-msg" class="hide"></span>
+    <span id="valid-msg" class="hide">✓ Valid</span>
+    <p id="output">Please enter a valid number below</p>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/1.9.20/libphonenumber-js.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <script src="phone_number_validation.js"></script>
+</body>
+
+</html>
