@@ -54,7 +54,6 @@ function tableSearch() {
 }
 
 function clearFilter() {
-  console.log("aave chhe");
   input = document.getElementById("search_input");
   filter = input.value.toLowerCase();
   table = document.getElementById("dataTable");
